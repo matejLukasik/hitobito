@@ -40,14 +40,7 @@ class RolesController < CrudController
           if created
             respond_with(entry, success: created, location: after_create_location(new_person))
           else
-            errors = []
-            entry.person.errors.messages.each do |key, value|
-              errors << { status: "422",
-                          source: key,
-                          detail: value
-              }
-            end
-            render json: { errors: errors}, status: :unprocessable_entity
+            render json: { errors: json_formatted_errors(entry.person.errors.messages) }, status: :unprocessable_entity
           end
         end
       end
@@ -113,16 +106,8 @@ class RolesController < CrudController
     if create_new_role_and_destroy_old_role
       change_type_successfull
     else
-      format.html
-      respond_to do |format|
-        format.html do
-          copy_errors(@new_role)
-          render :edit
-        end
-        format.js do
-          render json: "hello"
-        end
-      end
+      copy_errors(@new_role)
+      render :edit
     end
   end
 
@@ -273,4 +258,12 @@ class RolesController < CrudController
     @person_id = Role.with_deleted.find(params[:role_id]).person_id if params[:role_id]
   end
 
+  def json_formatted_errors messages
+    entry.person.errors.messages.map do |key, value|
+      { status: "422",
+        source: key,
+        detail: value
+      }
+    end
+  end
 end
