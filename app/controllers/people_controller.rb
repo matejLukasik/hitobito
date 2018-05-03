@@ -6,6 +6,7 @@
 #  https://github.com/hitobito/hitobito.
 
 class PeopleController < CrudController
+  respond_to :js, :json
 
   include Concerns::RenderPeopleExports
 
