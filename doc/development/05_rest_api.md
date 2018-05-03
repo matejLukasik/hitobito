@@ -1,51 +1,31 @@
-## REST API
+# REST API
 
 The JSON format follows the conventions of [json:api](http://jsonapi.org) (although in an older version according to this issue https://github.com/hitobito/hitobito/issues/207)
 
-### Authentication
+## Authentication
 
-* To use the APi you need an authentication-token.
-* Every useraccount can create such a token.
-* There are no tokens independent of a user account. 
+* To use the API you need an authentication-token.
+* Every user account can create such a token.
+* There are no tokens independent of a user account.
 * The token has the same permissions as the corresponding user.
 * Tokens have no expiration date.
 
-There are the following HTTP endpoints: 
-
+##### These are the user authentication HTTP endpoints:
 
 | Method  | Path                | Function |
 | --- | --- | --- |
-| POST    | /users/sign_in.json | read/generate token |
-| POST    | /users/token.json   | generate a new token |
-| DELETE  | /users/token.json   | delete token |
+| POST    | /users/sign_in.json | Read/generate token. |
+| POST    | /users/token.json   | Generate a new token. |
+| DELETE  | /users/token.json   | Delete token. |
 
 You have to pass `person[email]` and `person[password]` as parameters.
-
-With `curl` it looks like this:
-
-    curl -d "person[email]=mitglied@hitobito.ch" \
-         -d "person[password]=demo" \
-         http://demo.hitobito.ch/users/sign_in.json
-
-To use the rest of the API there are two possibilities:
-
-* **Parameters**: You provide `user_email` and `user_token` as paramateres in the path, the path has to end with `.json` (Example: `/groups/1.json?user_email=zumkehr@puzzle.ch&user_token=abcdef`).
-* **Headers**: Set the header like this: `X-User-Email`, `X-User-Token` and `Accept` (=`application/json`) 
-
-### Endpoints
-
-Currently the following endpoints are provided:
-
-| Method | Path                         | Function |
-| --- | --- | --- |
-| GET     | /groups                      | Root group           |
-| GET     | /groups/:id                  | Group Details        |
-| GET     | /groups/:id/people           | People of a certain group |
-| GET     | /groups/:group_id/people/:id | Person details      |
-
-
-### Example Response of a Sign In Request
-
+```bash
+curl -d "person[email]=mitglied@hitobito.ch" \
+     -d "person[password]=demo" \
+     http://demo.hitobito.ch/users/sign_in.json
+```
+##### Response:
+```js
     {
       people: [ {
         id: 446,
@@ -83,3 +63,56 @@ Currently the following endpoints are provided:
         }
       } ]
     }
+```
+To authenticate yourself to use all the other API endpoints you can either:
+* **Use parameters**: You provide `user_email` and `user_token` as paramateres in the path, the path has to end with `.json`. Example: `/groups/1.json?user_email=zumkehr@puzzle.ch&user_token=abcdef`.
+* **Use headers**: Set the header like this: `X-User-Email`, `X-User-Token` and `Accept` (`application/json`)
+
+## Endpoints
+
+### Groups
+| Method | Path                         | Function |
+| --- | --- | --- |
+| GET     | /groups                      | Root group           |
+| GET     | /groups/:id                  | Group Details        |
+| GET     | /groups/:id/people           | People of a certain group |
+| GET     | /groups/:group_id/people/:id | Person details      |
+
+### Roles
+| Method | Path                         | Description |
+| --- | --- | --- |
+| POST     | /:locale/groups/:id/roles.json                      | Create a new person in the group with `:id` and role provided in the body of the request.|
+
+For this request, you need to know the `id` of the group you want to create the Person in and also the role you want to give him. See *Groups* endpoints for information on how to get available groups and roles.
+Use the locale parameter to get validation responses in desired language.
+
+
+##### Example
+
+```bash
+curl --request POST \
+  --url http://localhost:3000/en/groups/1/roles.json \
+  --header 'accept: application/json' \
+  --header 'content-type: application/json' \
+  --header 'x-user-email: mat@zeilenwerk.ch' \
+  --header 'x-user-token: 5_LpiWSwCVrvt8mxoUzQ' \
+  --cookie 'locale=en; _session_id=da14eacd8545853f6e498acebcd15b7f' \
+  --data '{
+	"role": {
+		"new_person": {
+			"email": "testw22@xample.com",
+			"first_name": "a",
+			"last_name": "b",
+			"additional_email_attributes": [
+				{
+					"name": "privat",
+					"translated_label": "msn",
+					"mailings": "0",
+					"public": "1"
+				}
+			]
+		},
+		"type": "Group::Root::Administrator"
+	}
+}'
+`

@@ -6,8 +6,7 @@
 #  https://github.com/hitobito/hitobito.
 
 class RolesController < CrudController
-
-  respond_to :js
+  respond_to :js, :json
 
   self.nesting = Group
 
@@ -34,7 +33,24 @@ class RolesController < CrudController
     with_person_add_request do
       new_person = entry.person.new_record?
       created = create_entry_and_person
-      respond_with(entry, success: created, location: after_create_location(new_person))
+
+      respond_to do |format|
+        format.html {respond_with(entry, success: created, location: after_create_location(new_person))}
+        format.json do
+          if created
+            respond_with(entry, success: created, location: after_create_location(new_person))
+          else
+            errors = []
+            entry.person.errors.messages.each do |key, value|
+              errors << { status: "422",
+                          source: key,
+                          detail: value
+              }
+            end
+            render json: { errors: errors}, status: :unprocessable_entity
+          end
+        end
+      end
     end
   end
 
@@ -97,8 +113,16 @@ class RolesController < CrudController
     if create_new_role_and_destroy_old_role
       change_type_successfull
     else
-      copy_errors(@new_role)
-      render :edit
+      format.html
+      respond_to do |format|
+        format.html do
+          copy_errors(@new_role)
+          render :edit
+        end
+        format.js do
+          render json: "hello"
+        end
+      end
     end
   end
 
@@ -169,7 +193,7 @@ class RolesController < CrudController
       role.person = Person.new unless role.person
     else
       attrs = ActionController::Parameters.new(person_attrs)
-                                          .permit(*PeopleController.permitted_attrs)
+        .permit(*PeopleController.permitted_attrs)
       role.person = Person.new(attrs)
     end
   end
@@ -190,24 +214,24 @@ class RolesController < CrudController
   # A label for the current entry, including the model name, used for flash
   def full_entry_label(role = entry)
     translate(:full_entry_label, model_label: models_label(false),
-                                 role: h(role),
-                                 person: h(role.person),
-                                 group: h(role.group)).html_safe
+              role: h(role),
+              person: h(role.person),
+              group: h(role.group)).html_safe
   end
 
   def role_change_message
     key = @group.id == @old_role.group.id ? :role_changed : :role_changed_to_group
     translate(key, full_entry_label: full_entry_label(@old_role), new_role: h(@role),
-                   new_group: h(@group))
+              new_group: h(@group))
   end
 
   def after_create_location(new_person)
     return_path ||
-      if new_person && entry.person && entry.person.persisted?
-        group_person_path(entry.group_id, entry.person_id)
-      else
-        group_people_path(entry.group_id)
-      end
+    if new_person && entry.person && entry.person.persisted?
+      group_person_path(entry.group_id, entry.person_id)
+    else
+      group_people_path(entry.group_id)
+    end
   end
 
   def after_update_location

@@ -201,6 +201,26 @@ describe RolesController do
       end
     end
 
+    context 'json' do
+      it 'creates a new person.' do
+        expect do
+          post :create, group_id: group.id,
+                        role: { new_person: { email: "test@example.com", first_name: "Adam", last_name: "First" },
+                                type: Group::TopGroup::Member.sti_name },
+                        format: :json
+        end.to change { Person.count }
+      end
+      it 'validates email uniqueness.' do
+        post :create, group_id: group.id,
+                      role: { new_person: { email: person.email, first_name: "Adam", last_name: "First" },
+                              type: Group::TopGroup::Member.sti_name },
+                      format: :json
+        json = JSON.parse(response.body)
+        expect(json["errors"][0]["status"]).to eq "422" 
+        expect(json["errors"][0]["source"]).to eq "email" 
+      end
+    end
+
   end
 
   describe 'PUT update' do
