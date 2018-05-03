@@ -73,5 +73,10 @@ module Concerns
       params[:user_token] = params[:user_token].presence || request.headers['X-User-Token'].presence
       params[:user_email] = params[:user_email].presence || request.headers['X-User-Email'].presence
     end
+
+    def valid_auth_token?
+      request.headers['X-User-Token'] &&
+        Person.where(authentication_token: request.headers['X-User-Token']).exists?
+    end
   end
 end
