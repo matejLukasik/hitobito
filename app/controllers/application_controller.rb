@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
   include ERB::Util
 
   # protect with null_session only in specific api controllers
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, unless: :valid_auth_token?
 
   helper_method :person_home_path
   hide_action :person_home_path
