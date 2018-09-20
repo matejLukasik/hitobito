@@ -611,7 +611,8 @@ de:
         success: Rechnung wurde storniert.
     pdf:
       total: Gesamtbetrag
-      total_vat: MWSt. gesamt
+      total_vat: MwSt.
+      cost: Zwischenbetrag
       invoice_number: Rechnungsnummer
       invoice_date: Rechnungsdatum
       due_at: Fällig bis
@@ -1066,6 +1067,11 @@ de:
         active: war die Rolle aktiv.
         created: wurde die Rolle erstellt.
         deleted: wurde die Rolle gelöscht.
+
+    attributes:
+      title: Felder
+      match: enthält
+      equal: ist genau
 
     new:
       title: Personen filtern
