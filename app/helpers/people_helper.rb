@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-#  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
+#  Copyright (c) 2012-2018, Jungwacht Blauring Schweiz. This file is part of
 #  hitobito and licensed under the Affero General Public License version 3
 #  or later. See the COPYING file at the top-level directory or at
 #  https://github.com/hitobito/hitobito.
@@ -12,10 +12,15 @@ module PeopleHelper
   end
 
   def dropdown_people_export(details = false, emails = true, labels = true, households = true)
-    Dropdown::PeopleExport.new(self, current_user, params, details: details,
-                                                           emails: emails,
-                                                           labels: labels,
-                                                           households: households).to_s
+    Dropdown::PeopleExport.new(self,
+                               current_user,
+                               params,
+                               details: details,
+                               emails: emails,
+                               labels: labels,
+                               mailchimp_synchronization_path: mailchimp_synchronization_path,
+                               mailchimp_synchronization_enabled: mailchimp_synchronization_enabled,
+                               households: households).to_s
   end
 
   def invoice_button(people, *groups)
@@ -90,6 +95,20 @@ module PeopleHelper
       user != current_user &&
       !origin_user &&
       group.people.exists?(id: user.id)
+  end
+
+  def mailchimp_synchronization_path
+    if @mailing_list
+      group_mailing_list_mailchimp_synchronizations_path(
+        group_id: @group.id, mailing_list_id: @mailing_list.id
+      )
+    end
+  end
+
+  def mailchimp_synchronization_enabled
+    @mailing_list and
+    @mailing_list.mailchimp_api_key.present? and
+    @mailing_list.mailchimp_list_id.present?
   end
 
 end

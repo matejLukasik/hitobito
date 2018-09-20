@@ -25,4 +25,7 @@
 
 Fabricator(:mailing_list) do
   name { Faker::Company.name }
+  subscriptions(count: 1)
+  mailchimp_api_key "1234567890d66d25cc5c9285ab5a5552-us12"
+  mailchimp_list_id "123456789"
 end

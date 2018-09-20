@@ -54,6 +54,7 @@ gem 'validates_by_schema'
 gem 'validates_timeliness', '< 4.0'
 gem 'vcard'
 gem 'wagons'
+gem 'gibbon', '~> 3.2'
 
 # load after others because of active record inherited alias chain.
 gem 'kaminari', '< 1.0.0' # requires ruby 2.0
@@ -95,10 +96,11 @@ group :development do
   gem 'quiet_assets'
   gem 'redcarpet'
   gem 'request_profiler'
+  gem 'xray-rails', '~> 0.3.1'
 end
 
 group :test do
-  gem 'capybara'
+  gem 'webmock', '~> 3.4', '>= 3.4.2'
   gem 'capybara-screenshot'
   gem 'database_cleaner'
   gem 'fabrication'

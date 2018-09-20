@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-#  Copyright (c) 2012-2017, Jungwacht Blauring Schweiz. This file is part of
+#  Copyright (c) 2012-2018, Jungwacht Blauring Schweiz. This file is part of
 #  hitobito and licensed under the Affero General Public License version 3
 #  or later. See the COPYING file at the top-level directory or at
 #  https://github.com/hitobito/hitobito.
@@ -19,6 +19,8 @@ module Dropdown
       @email_addresses = options[:emails]
       @labels = options[:labels]
       @households = options[:households]
+      @mailchimp_synchronization_path = options[:mailchimp_synchronization_path]
+      @mailchimp_synchronization_enabled = options[:mailchimp_synchronization_enabled]
 
       init_items
     end
@@ -30,6 +32,7 @@ module Dropdown
       tabular_links(:xlsx)
       vcard_link
       pdf_link
+      mailchimp_link
       label_links
       email_addresses_link
     end
@@ -44,6 +47,14 @@ module Dropdown
 
     def vcard_link
       add_item(translate(:vcard), params.merge(format: :vcf), target: :new)
+    end
+
+    def mailchimp_link
+      if @mailchimp_synchronization_enabled
+        add_item('MailChimp', @mailchimp_synchronization_path, method: :post, remote: true)
+      elsif @mailchimp_synchronization_path
+        add_item_with_tooltip('MailChimp', "#", {class: "disabled"})
+      end
     end
 
     def email_addresses_link

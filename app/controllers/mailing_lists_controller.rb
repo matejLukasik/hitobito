@@ -11,9 +11,13 @@ class MailingListsController < CrudController
 
   self.permitted_attrs = [:name, :description, :publisher, :mail_name,
                           :additional_sender, :subscribable, :subscribers_may_post,
-                          :anyone_may_post, :main_email, :delivery_report, preferred_labels: []]
+                          :anyone_may_post, :main_email, :delivery_report,
+                          :mailchimp_api_key, :mailchimp_list_id,
+                          :syncing_mailchimp, :last_synced_mailchimp_at, preferred_labels: []]
 
   decorates :group, :mailing_list
+
+  before_destroy :destroy_in_mailchimp
 
   prepend_before_action :parent
   before_render_form :load_labels
@@ -26,6 +30,16 @@ class MailingListsController < CrudController
   end
 
   private
+
+  def destroy_in_mailchimp
+    if connected_to_mailchimp? and entry.people.any?
+      MailchimpDestructionJob.new(entry.mailchimp_list_id, entry.mailchimp_api_key, entry.people).enqueue!
+    end
+  end
+
+  def connected_to_mailchimp?
+    entry.mailchimp_api_key.present? and entry.mailchimp_list_id.present?
+  end
 
   def list_entries
     super.order(:name)

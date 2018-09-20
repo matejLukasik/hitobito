@@ -39,6 +39,7 @@ Hitobito::Application.routes.draw do
 
       end
 
+
       resource :invoice_list, except: [:edit]
       resource :invoice_config, only: [:edit, :show, :update]
 
@@ -179,6 +180,8 @@ Hitobito::Application.routes.draw do
             resource :user, only: [:create, :destroy], controller: 'subscriber/user'
           end
         end
+
+        resources :mailchimp_synchronizations, only: [:create]
       end
 
       resource :csv_imports, only: [:new, :create], controller: 'person/csv_imports' do
@@ -228,6 +231,8 @@ Hitobito::Application.routes.draw do
 
     get 'downloads/:id' => 'async_downloads#show'
     get 'downloads/:id/exists' => 'async_downloads#exists?'
+
+    get 'synchronizations/:id' => 'async_synchronizations#show'
 
   end # scope locale
 
